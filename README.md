@@ -4,3 +4,4 @@ Run:
 source venv/bin/activate
 python bot_alert.py
 # crypto-alert-bot
+# crypto-alert-bot
