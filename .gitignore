@@ -1,4 +1,5 @@
 venv/
 .env
-alerts.db
 __pycache__/
+alerts.db
+*.pyc
