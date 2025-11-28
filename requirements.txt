@@ -1,0 +1,3 @@
+python-telegram-bot[emoji]>=20
+requests
+python-dotenv
