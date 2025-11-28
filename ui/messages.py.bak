@@ -77,6 +77,3 @@ def usage_price():
 
 def usage_setalert():
     return "Usage: /setalert SYMBOL above|below PRICE"
-
-# backward-compatible alias for handlers
-START_TEXT = start_message()
