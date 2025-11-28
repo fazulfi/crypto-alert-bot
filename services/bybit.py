@@ -1,19 +1,30 @@
 # services/bybit.py
 import requests
 
-# coba endpoint v2 public; kalau tidak cocok, kita ganti
-BYBIT_TICKER = 'https://api.bybit.com/v2/public/tickers'
-
-def get_bybit_price(symbol: str):
+def get_bybit_price(symbol):
     symbol = symbol.upper()
     try:
-        r = requests.get(BYBIT_TICKER, params={'symbol': symbol}, timeout=8)
-        r.raise_for_status()
-        data = r.json()
-        # data['result'] di v2 biasanya list
-        if data.get('result'):
-            tick = data['result'][0]
-            price = tick.get('last_price') or tick.get('last') or tick.get('last_price')
-            return float(price)
+        r = requests.get(
+            "https://api.bybit.com/v5/market/tickers",
+            params={"category": "linear", "symbol": symbol},
+            timeout=8
+        )
+        if r.status_code != 200:
+            return None
+
+        j = r.json()
+        if j.get("retCode") != 0:
+            return None
+
+        lst = j.get("result", {}).get("list", [])
+        if not lst:
+            return None
+
+        p = lst[0].get("lastPrice") or lst[0].get("last_price") or lst[0].get("last")
+        if p is None:
+            return None
+
+        return float(p)
+
     except Exception:
         return None

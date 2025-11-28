@@ -10,7 +10,7 @@ from services.alerts_db import init_db, get_pending_alerts, mark_triggered
 from services.bybit import get_bybit_price
 from ui.messages import ALERT_TEMPLATE
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv('TELEGRAM_TOKEN')
