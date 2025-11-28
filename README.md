@@ -31,17 +31,17 @@ Bisa dijalankan di Termux atau VPS
 🛠 Instalasi
 
 1. Clone repository
-'''
+
 git clone git@github.com:fazulfi/crypto-alert-bot.git
 cd crypto-alert-bot
-'''
+
 2. Buat virtualenv & install dependency
-'''
+
 python -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
-'''
+
 
 ---
 
