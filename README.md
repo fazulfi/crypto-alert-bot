@@ -3,3 +3,4 @@ See .env.example for environment variables.
 Run:
 source venv/bin/activate
 python bot_alert.py
+# crypto-alert-bot
