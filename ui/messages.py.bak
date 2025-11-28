@@ -36,7 +36,7 @@ def _to_wib(dt=None):
 
 # ---------------------- message templates ----------------------
 
-def start_message():
+def START_TEXT():
     return (
         "<b>Crypto Alert Bot</b>\n"
         "<i>Perintah:</i>\n"
@@ -47,19 +47,19 @@ def start_message():
         "<i>Kirim 1 perintah per pesan.</i>"
     )
 
-def price_message(symbol, price):
+def PRICE_TEMPLATE(symbol, price):
     """Jika price None -> error message."""
     if price is None:
         return f"Gagal ambil harga untuk <b>{symbol}</b>"
     return f"<b>{symbol}</b> price: <code>{_fmt_price(price)}</code>"
 
-def alert_set_message(symbol, direction, price, aid=None):
+def ALERT_SET(symbol, direction, price, aid=None):
     s = f"✅ <b>Alert diset:</b> <b>{symbol}</b> {direction} {_fmt_price(price)}"
     if aid is not None:
         s += f" <i>(id={aid})</i>"
     return s
 
-def alert_trigger_message(symbol, direction, threshold, current, ts=None):
+def ALERT_TEMPLATE(symbol, direction, threshold, current, ts=None):
     wib = _to_wib(ts)
     time_str = wib.strftime("%Y-%m-%d %H:%M:%S")
     return (
@@ -77,3 +77,36 @@ def usage_price():
 
 def usage_setalert():
     return "Usage: /setalert SYMBOL above|below PRICE"
+
+
+# --- backward compatibility aliases (string values, not callables) ---
+def _str(val):
+    try:
+        return val() if callable(val) else val
+    except Exception:
+        # jika pemanggilan fungsi error, kembalikan string kosong daripada fungsi
+        return ''
+
+# map old uppercase names to current variables (update list kalau perlu)
+try:
+    START_TEXT = _str(start_message)
+except NameError:
+    START_TEXT = ''
+
+try:
+    PRICE_TEMPLATE = _str(price_message)
+except NameError:
+    PRICE_TEMPLATE = ''
+
+try:
+    ALERT_TEMPLATE = _str(alert_trigger_message)
+except NameError:
+    ALERT_TEMPLATE = ''
+
+# also create a few usage aliases if handlers expect them
+try:
+    USAGE_SETA = _str(usage_setalert)
+except NameError:
+    pass
+
+# end compatibility block

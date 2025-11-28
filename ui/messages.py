@@ -1,82 +1,65 @@
 # ui/messages.py
-from datetime import datetime, timezone, timedelta
-try:
-    from zoneinfo import ZoneInfo  # py3.9+
-except Exception:
-    ZoneInfo = None
+# Message templates centralised.
+# Pastikan handlers memakai .format(...) sesuai placeholder di bawah.
 
-def _fmt_price(p):
-    """Format angka jadi 1,234.56; graceful if can't parse."""
-    try:
-        return f"{float(p):,.2f}"
-    except Exception:
-        return str(p)
+ALERT_TEMPLATE = (
+    "🚨 <b>ALERT</b>\n"
+    "<b>{symbol}</b> sudah <i>{direction} {threshold}</i>\n"
+    "Current: <code>{price}</code>\n"
+    "<i>{timestamp}</i>"
+)
 
-def _to_wib(dt=None):
-    """Convert datetime (aware or naive UTC) -> Asia/Jakarta timezone.
-       If zoneinfo not available, fallback +7h."""
-    if dt is None:
-        dt = datetime.now(timezone.utc)
-    # accept ISO string
-    if isinstance(dt, str):
-        try:
-            dt = datetime.fromisoformat(dt)
-        except Exception:
-            dt = datetime.now(timezone.utc)
-    # if naive, assume UTC
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    try:
-        if ZoneInfo:
-            return dt.astimezone(ZoneInfo("Asia/Jakarta"))
-        else:
-            return dt + timedelta(hours=7)
-    except Exception:
-        return dt + timedelta(hours=7)
+# Backwards-compatible alias (some handlers used ALERT_TRIGGER_MESSAGE)
+ALERT_TRIGGER_MESSAGE = ALERT_TEMPLATE
+ALERT_TRIGGER = ALERT_TEMPLATE
 
-# ---------------------- message templates ----------------------
+START_TEXT = (
+    "<b>Crypto Alert Bot</b>\n"
+    "Perintah:\n"
+    "<code>/price BTCUSDT</code>\n"
+    "<code>/setalert BTCUSDT above 70000</code>\n"
+    "<code>/alerts</code>\n"
+    "<code>/remove ID</code>\n\n"
+    "Kirim 1 perintah per pesan."
+)
 
-def start_message():
-    return (
-        "<b>Crypto Alert Bot</b>\n"
-        "<i>Perintah:</i>\n"
-        "/price SYMBOL\n"
-        "/setalert SYMBOL above|below PRICE\n"
-        "/alerts\n"
-        "/remove ID\n\n"
-        "<i>Kirim 1 perintah per pesan.</i>"
-    )
+# handy alias names used in handlers
+start_message = START_TEXT
+START = START_TEXT
 
-def price_message(symbol, price):
-    """Jika price None -> error message."""
-    if price is None:
-        return f"Gagal ambil harga untuk <b>{symbol}</b>"
-    return f"<b>{symbol}</b> price: <code>{_fmt_price(price)}</code>"
+# price template — handlers might call PRICE_TEMPLATE.format(symbol=..., price=...)
+PRICE_TEMPLATE = "<b>{symbol}</b> price: <code>{price}</code>"
+PRICE_MESSAGE = PRICE_TEMPLATE
+price_message = PRICE_TEMPLATE
 
-def alert_set_message(symbol, direction, price, aid=None):
-    s = f"✅ <b>Alert diset:</b> <b>{symbol}</b> {direction} {_fmt_price(price)}"
-    if aid is not None:
-        s += f" <i>(id={aid})</i>"
-    return s
+# alert set acknowledgement
+ALERT_SET = "✅ Alert diset: <b>{symbol}</b> {direction} <code>{price}</code> (id={id})"
+ALERT_SET_MESSAGE = ALERT_SET
+alert_set_message = ALERT_SET
 
-def alert_trigger_message(symbol, direction, threshold, current, ts=None):
-    wib = _to_wib(ts)
-    time_str = wib.strftime("%Y-%m-%d %H:%M:%S")
-    return (
-        "🚨 <b>ALERT</b>\n"
-        f"<b>{symbol}</b> sudah <i>{direction}</i> {_fmt_price(threshold)}\n\n"
-        f"<b>Current:</b> <code>{_fmt_price(current)}</code>\n"
-        f"<b>Waktu:</b> {time_str} WIB"
-    )
+# usage/help snippets
+USAGE_PRICE = "Usage: /price SYMBOL"
+USAGE_SETA = "Usage: /setalert SYMBOL above|below PRICE"
+USAGE_SETALERT = USAGE_SETA
 
-def no_alerts_message():
-    return "Kamu tidak punya alert."
+# no-alerts message
+NO_ALERTS_MESSAGE = "Kamu tidak punya alert."
+no_alerts_message = NO_ALERTS_MESSAGE
 
-def usage_price():
-    return "Usage: /price SYMBOL"
+# small helper to safely coerce templates if someone imports non-string later
+def _s(x):
+    return x if isinstance(x, str) else str(x)
 
-def usage_setalert():
-    return "Usage: /setalert SYMBOL above|below PRICE"
+# Re-assign cleaned strings back (this avoids accidental non-string at import time)
+ALERT_TEMPLATE = _s(ALERT_TEMPLATE)
+ALERT_TRIGGER_MESSAGE = _s(ALERT_TRIGGER_MESSAGE)
+START_TEXT = _s(START_TEXT)
+PRICE_TEMPLATE = _s(PRICE_TEMPLATE)
+ALERT_SET = _s(ALERT_SET)
 
-# backward-compatible alias for handlers
-START_TEXT = start_message()
+# Exports (names listed so you can introspect)
+__all__ = [
+    "ALERT_TEMPLATE", "ALERT_TRIGGER_MESSAGE", "START_TEXT",
+    "PRICE_TEMPLATE", "ALERT_SET", "USAGE_PRICE", "USAGE_SETALERT",
+    "NO_ALERTS_MESSAGE"
+]
